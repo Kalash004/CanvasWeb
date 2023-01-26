@@ -30,10 +30,17 @@
         <fieldset id="scale">
             <label for="scl">Scale</label>
             <input onchange="setScale()" oninput="setScale()" type="range" min="1" max="100" id="scl" step="0.5" value="1"> 
+            <canvas id="brush-setting"></canvas>
         </fieldset>
     </div>
     <canvas id="canvas"></canvas>
     <script>
+        let color;
+        let scale;
+        let brush = {
+
+        }
+
         window.addEventListener("load", () => {
             console.log("test");
             const canvas = document.querySelector("#canvas");
@@ -54,6 +61,11 @@
         }
         )
 
+        function setScale() {
+            const scaleshower = document.querySelector("#scl");
+            scale = scaleshower.value;
+            setBrush();
+        }
 
         function setRGB() {
             const colorshower = document.querySelector("#hexVal");
@@ -62,7 +74,20 @@
             let B = document.querySelector("#b");
             colorshower.textContent = R.value + "." + G.value + "." + B.value;
             colorshower.style.backgroundColor = "rgb(" + R.value + "," + G.value + "," + B.value + ")";
+            color = `rgb(${R},${G},${B})`;
+            setBrush();
+        }
 
+        function setBrush() {
+            const canvas = document.querySelector("#brush-setting");
+            const cntx = canvas.getContext("2d");
+            cntx.clearRect(0, 0, canvas.width, canvas.height);
+
+            brush.scale = scale;
+            brush.color = color;
+            
+            cntx.strokeStyle = brush.color;
+            cntx.fillRect(1,1,brush.scale,brush.scale);
         }
 
     </script>
