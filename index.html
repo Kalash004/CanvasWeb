@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+
+<body>
+    <div id="sliders-color">
+        <fieldset id="R">
+            <label for="r">R</label>
+            <input onchange="setRGB()" type="range" min="0" max="255" id="r" step="1" value="0">
+        </fieldset>
+        <fieldset id="G">
+            <label for="g">G</label>
+            <input onchange="setRGB()" type="range" min="0" max="255" id="g" step="1" value="0">
+        </fieldset>
+        <fieldset id="B">
+            <label for="b">B</label>
+            <input onchange="setRGB()" type="range" min="0" max="255" id="b" step="1" value="0">
+        </fieldset>
+        <span id="hexVal">1</span>
+
+    </div>
+
+    <div id="slider-scale">
+        <fieldset id="scale">
+
+        </fieldset>
+    </div>
+    <canvas id="canvas"></canvas>
+    <script>
+        window.addEventListener("load", () => {
+            console.log("test");
+            const canvas = document.querySelector("#canvas");
+            const ctx = canvas.getContext("2d");
+
+            canvas.height = window.innerHeight;
+            canvas.width = window.innerWidth;
+
+            ctx.strokeStyle = "black";
+            ctx.strokeRect(0, 0, canvas.width, canvas.height);
+
+            ctx.strokeStyle = "red";
+            ctx.strokeRect(50, 50, 200, 200);
+
+            ctx.beginPath();
+            ctx.moveTo(100, 100);
+            ctx.lineTo(200, 200);
+        }
+        )
+
+
+        function setRGB() {
+            const colorshower = document.querySelector("#hexVal");
+            let R = document.querySelector("#r");
+            let G = document.querySelector("#g");
+            let B = document.querySelector("#b");
+            console.log(R.value + "." + G.value + "." + B.value);
+            colorshower.textContent = R.value + "." + G.value + "." + B.value;
+            colorshower.style.backgroundColor = "#" + rgbToHex(R.value, G.value, B.value);
+
+        }
+
+        function rgbToHex(r, g, b) {
+            console.log(valueToHex(r) + valueToHex(g) + valueToHex(b));
+            return (valueToHex(r) + valueToHex(g) + valueToHex(b));
+        }
+
+        function valueToHex(c) {
+            var hex = c.toString(16);
+            return hex
+        }
+
+    </script>
+</body>
+
+</html>
