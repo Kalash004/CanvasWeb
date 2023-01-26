@@ -1,63 +1,134 @@
 <!DOCTYPE html>
 <html lang="en">
-
-<head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
-</head>
-
-<body>
-    <div id="sliders-color">
-        <fieldset id="R">
-            <label for="r">R</label>
-            <input onchange="setRGB()" oninput="setRGB()" type="range" min="0" max="255" id="r" step="1" value="0">
-        </fieldset>
-        <fieldset id="G">
-            <label for="g">G</label>
-            <input onchange="setRGB()" oninput="setRGB()" type="range" min="0" max="255" id="g" step="1" value="0">
-        </fieldset>
-        <fieldset id="B">
-            <label for="b">B</label>
-            <input onchange="setRGB()" oninput="setRGB()" type="range" min="0" max="255" id="b" step="1" value="0">
-        </fieldset>
-        <span id="hexVal">0</span>
-
-    </div>
-
-    <div id="slider-scale">
-        <fieldset id="scale">
-            <label for="scl">Scale</label>
-            <input onchange="setScale()" oninput="setScale()" type="range" min="1" max="100" id="scl" step="0.5" value="1"> 
-            <canvas id="brush-setting"></canvas>
-        </fieldset>
-    </div>
-    <canvas id="canvas"></canvas>
-    <script>
-        let color;
-        let scale;
-        let brush = {
-
-        }
-
-        window.addEventListener("load", () => {
-            console.log("test");
+    <head>
+        <meta charset="UTF-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Document</title>
+    </head>
+    <body>
+        <canvas id="canvas"></canvas>
+        <section id="toolBag">
+            <div id="sliders-color">
+                <fieldset id="R">
+                    <label for="r">R</label>
+                    <input
+                    onchange="setRGB()"
+                    oninput="setRGB()"
+                    type="range"
+                    min="0"
+                    max="255"
+                    id="r"
+                    step="1"
+                    value="0"
+                    >
+                </fieldset>
+                <fieldset id="G">
+                    <label for="g">G</label>
+                    <input
+                    onchange="setRGB()"
+                    oninput="setRGB()"
+                    type="range"
+                    min="0"
+                    max="255"
+                    id="g"
+                    step="1"
+                    value="0"
+                    >
+                </fieldset>
+                <fieldset id="B">
+                    <label for="b">B</label>
+                    <input
+                    onchange="setRGB()"
+                    oninput="setRGB()"
+                    type="range"
+                    min="0"
+                    max="255"
+                    id="b"
+                    step="1"
+                    value="0"
+                    >
+                </fieldset>
+                <span id="hexVal">0</span>
+            </div>
+            <div id="slider-scale">
+                <fieldset id="scale">
+                    <label for="scl">Scale</label>
+                    <input
+                    onchange="setScale()"
+                    oninput="setScale()"
+                    type="range"
+                    min="1"
+                    max="100"
+                    id="scl"
+                    step="0.5"
+                    value="1"
+                    >
+                    <canvas id="brush-setting" height="100" width="100"></canvas>
+                </fieldset>
+            </div>
+            <div id="buttons">
+                <button onclick="changeType(this)" id="brush-type" value="1">Normal brush</button>
+                <button onclick="resetCanvas()" id="reset">Reset Canvas</button>
+                <button onclick="saveCanvas()" id="save">Save</button>
+            </div>
+        </section>
+       
+            <script>
+                let color;
+                let scale;
+                let context;
+                let currentCanvas;
+                let brush = {
+                    
+                }
+                let isPaiting = false;
+                
+            window.addEventListener("load", () => {
             const canvas = document.querySelector("#canvas");
             const ctx = canvas.getContext("2d");
+            context = ctx;
+            currentCanvas = canvas;
+            const rect = canvas.getBoundingClientRect();
+            const canvasOffsetX = rect.left;//canvas.offsetLeft;
+            const canvasOffsetY = rect.top;//canvas.offsetTop;
 
-            canvas.height = window.innerHeight;
-            canvas.width = window.innerWidth;
+            console.log(canvasOffsetX);
+            console.log(canvasOffsetY);
 
+            canvas.height = "900";
+            canvas.width = "900";
+            
             ctx.strokeStyle = "black";
             ctx.strokeRect(0, 0, canvas.width, canvas.height);
+            
+            canvas.addEventListener('mousedown', (e) => {
+                isPaiting = true;
+              
+            }
+            )
 
-            ctx.strokeStyle = "red";
-            ctx.strokeRect(50, 50, 200, 200);
+            canvas.addEventListener('mouseup', (e)=> {
+                isPaiting = false;
+                ctx.stroke();
+                ctx.beginPath();
+            }
+            )
 
-            ctx.beginPath();
-            ctx.moveTo(100, 100);
-            ctx.lineTo(200, 200);
+            const draw = (e) => {
+                if(!isPaiting) {
+                    return;
+                }
+
+                ctx.strokeStyle = brush.color;
+                ctx.lineWidth = brush.scale;
+                ctx.lineCap = 'square';
+
+                ctx.lineTo(e.clientX-canvasOffsetX, e.clientY);
+                ctx.stroke();
+            }
+            canvas.addEventListener('mousemove',draw);
+            
         }
         )
 
@@ -69,28 +140,93 @@
 
         function setRGB() {
             const colorshower = document.querySelector("#hexVal");
-            let R = document.querySelector("#r");
-            let G = document.querySelector("#g");
-            let B = document.querySelector("#b");
-            colorshower.textContent = R.value + "." + G.value + "." + B.value;
-            colorshower.style.backgroundColor = "rgb(" + R.value + "," + G.value + "," + B.value + ")";
+            let R = document.querySelector("#r").value;
+            let G = document.querySelector("#g").value;
+            let B = document.querySelector("#b").value;
             color = `rgb(${R},${G},${B})`;
+            colorshower.textContent = color;
             setBrush();
         }
 
         function setBrush() {
-            const canvas = document.querySelector("#brush-setting");
-            const cntx = canvas.getContext("2d");
-            cntx.clearRect(0, 0, canvas.width, canvas.height);
+                const canvas = document.querySelector("#brush-setting");
+                const cntx = canvas.getContext("2d");
+                cntx.clearRect(0, 0, canvas.width, canvas.height);
+                
 
-            brush.scale = scale;
-            brush.color = color;
-            
-            cntx.strokeStyle = brush.color;
-            cntx.fillRect(1,1,brush.scale,brush.scale);
+                brush.scale = scale;
+                brush.color = color;
+                
+                cntx.fillStyle = brush.color;
+                cntx.strokeStyle ="black";
+                cntx.fillRect(1,1,brush.scale,brush.scale);
+        }
+        function generateSpray() {
+
         }
 
-    </script>
-</body>
+        function changeType(button) {
+            let val = button.value;
+            if (val == 3) {
+                button.value = 1;
+                button.innerHTML = "Normal Brush";
+                brush.type = "normal";
+            } else if (val == 2) {
+                button.value ++;
+                button.innerHTML = "Spray";
+                brush.type = "spray";
+            } else if (val == 1) {
+                button.value ++;
+                button.innerHTML = "Line";
+                brush.type = "line";
+            }
+            setBrush();
+        }
 
+        function resetCanvas() {
+            context.clearRect(0, 0, currentCanvas.width, currentCanvas.height);
+        }
+        
+        </script>
+
+        <style>
+            
+            #canvas {
+                border: black 1px solid;
+            }
+            #toolBag {
+                float: right;
+                width: max-content;
+                background-color: cadetblue;
+            }
+
+            #buttons {
+                display: flex;
+            }
+
+            #buttons button {
+                width: 100%;
+                height: 100px;
+                background-color: bisque;
+                border: black solid 1px;
+            }
+
+            #sliders-color {
+                width: 50px;
+            }
+
+            #sliders-color fieldset {
+                border: none;
+            }
+            
+            #sliders-scale {
+                width: 50px;
+            }
+
+            #scale {
+                border: none;
+                width: 50px;
+            }
+        </style>
+    </body>
 </html>
