@@ -1,169 +1,178 @@
 <!DOCTYPE html>
 <html lang="en">
-    <head>
-        <meta charset="UTF-8">
-        <meta http-equiv="X-UA-Compatible" content="IE=edge">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Document</title>
-    </head>
-    <body>
-        <canvas id="canvas"></canvas>
-        <section id="toolBag">
-            <div id="sliders-color">
-                <fieldset id="R">
-                    <label for="r">R</label>
-                    <input
-                    onchange="setRGB()"
-                    oninput="setRGB()"
-                    type="range"
-                    min="0"
-                    max="255"
-                    id="r"
-                    step="1"
-                    value="0"
-                    >
-                </fieldset>
-                <fieldset id="G">
-                    <label for="g">G</label>
-                    <input
-                    onchange="setRGB()"
-                    oninput="setRGB()"
-                    type="range"
-                    min="0"
-                    max="255"
-                    id="g"
-                    step="1"
-                    value="0"
-                    >
-                </fieldset>
-                <fieldset id="B">
-                    <label for="b">B</label>
-                    <input
-                    onchange="setRGB()"
-                    oninput="setRGB()"
-                    type="range"
-                    min="0"
-                    max="255"
-                    id="b"
-                    step="1"
-                    value="0"
-                    >
-                </fieldset>
-                <span id="hexVal">0</span>
-            </div>
-            <div id="slider-scale">
-                <fieldset id="scale">
-                    <label for="scl">Scale</label>
-                    <input
-                    onchange="setScale()"
-                    oninput="setScale()"
-                    type="range"
-                    min="1"
-                    max="100"
-                    id="scl"
-                    step="0.5"
-                    value="1"
-                    >
-                    <canvas id="brush-setting" height="100" width="100"></canvas>
-                </fieldset>
-            </div>
-            <div id="buttons">
-                <button onclick="changeType(this)" id="brush-type" value="1">Normal brush</button>
-                <button onclick="resetCanvas()" id="reset">Reset Canvas</button>
-                <button onclick="saveCanvas()" id="save">Save</button>
-            </div>
-        </section>
-       
-            <script>
-                let color;
-                let scale;
-                let context;
-                let currentCanvas;
-                let brush = {
-                    
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+
+<body>
+    <canvas id="canvas"></canvas>
+    <section id="toolBag">
+        <div id="sliders-color">
+            <fieldset id="R">
+                <label for="r">R</label>
+                <input onchange="brush.setRGB()" oninput="brush.setRGB()" type="range" min="0" max="255" id="r" step="1"
+                    value="0">
+            </fieldset>
+            <fieldset id="G">
+                <label for="g">G</label>
+                <input onchange="brush.setRGB()" oninput="brush.setRGB()" type="range" min="0" max="255" id="g" step="1"
+                    value="0">
+            </fieldset>
+            <fieldset id="B">
+                <label for="b">B</label>
+                <input onchange="brush.setRGB()" oninput="brush.setRGB()" type="range" min="0" max="255" id="b" step="1"
+                    value="0">
+            </fieldset>
+            <span id="hexVal">0</span>
+        </div>
+        <div id="slider-scale">
+            <fieldset id="scale">
+                <label for="scl">Scale</label>
+                <input onchange="brush.setScale()" oninput="brush.setScale()" type="range" min="1" max="100" id="scl"
+                    step="0.5" value="1">
+                <canvas id="brush-setting" height="100" width="100"></canvas>
+            </fieldset>
+        </div>
+        <div id="buttons">
+            <button onclick="brush.changeType(this)" id="brush-type" value="1">Normal brush</button>
+            <button onclick="currentCanvas.resetCanvas()" id="reset">Reset Canvas</button>
+            <button onclick="saveCanvas()" id="save">Save</button>
+        </div>
+    </section>
+    <section id="canvas-holder"></section>
+    <script>
+        let currentCanvas; 
+        let canvasCount = 1;
+        class cCanvas {
+            constructor(reference) {
+                this.reference = reference;
+                console.log(this.reference);
+                this.ctx = reference.getContext("2d");
+                this.rect = this.reference.getBoundingClientRect();
+                this.canvasOffsetX = this.rect.left;
+                this.canvasOffsety = this.rect.top;
+                reference.height = "900";
+                reference.width = "900";
+                this.brush = brush;
+
+
+                reference.addEventListener("mousedown", () => {
+                    this.mouseDown();
+                })
+
+                reference.addEventListener("mouseup", () => {
+                    this.mouseUp();
+                })
+
+                const draw = (e) => {
+                    if (!brush.isPainting) {
+                        return;
+                    }
+
+                    this.ctx.strokeStyle = brush.color;
+                    this.ctx.lineWidth = brush.scale;
+                    this.ctx.lineCap = 'square';
+
+                    this.ctx.lineTo(e.clientX - this.canvasOffsetX, e.clientY);
+                    this.ctx.stroke();
                 }
-                let isPaiting = false;
-                
-            window.addEventListener("load", () => {
-            const canvas = document.querySelector("#canvas");
-            const ctx = canvas.getContext("2d");
-            context = ctx;
-            currentCanvas = canvas;
-            const rect = canvas.getBoundingClientRect();
-            const canvasOffsetX = rect.left;//canvas.offsetLeft;
-            const canvasOffsetY = rect.top;//canvas.offsetTop;
+                reference.addEventListener('mousemove', draw);
 
-            console.log(canvasOffsetX);
-            console.log(canvasOffsetY);
-
-            canvas.height = "900";
-            canvas.width = "900";
-            
-            ctx.strokeStyle = "black";
-            ctx.strokeRect(0, 0, canvas.width, canvas.height);
-            
-            canvas.addEventListener('mousedown', (e) => {
-                isPaiting = true;
-              
             }
-            )
 
-            canvas.addEventListener('mouseup', (e)=> {
-                isPaiting = false;
-                ctx.stroke();
-                ctx.beginPath();
+            get canvas() {
+                return this.reference;
             }
-            )
 
-            const draw = (e) => {
-                if(!isPaiting) {
+
+            mouseDown() {
+                this.brush.isPainting = true;
+            }
+
+            mouseUp() {
+                this.brush.isPainting = false;
+                this.ctx.stroke();
+                this.ctx.beginPath();
+            }
+
+            mouseDraw() {
+                if (!this.brush.isPainting) {
                     return;
                 }
-
-                ctx.strokeStyle = brush.color;
-                ctx.lineWidth = brush.scale;
-                ctx.lineCap = 'square';
-
-                ctx.lineTo(e.clientX-canvasOffsetX, e.clientY);
-                ctx.stroke();
+                brush.brushMethod;
             }
-            canvas.addEventListener('mousemove',draw);
-            
-        }
-        )
 
-        function setScale() {
-            const scaleshower = document.querySelector("#scl");
-            scale = scaleshower.value;
-            setBrush();
+            resetCanvas() {
+                console.log("ran")
+                this.ctx.clearRect(0, 0, this.reference.width, this.reference.height);
+            }
+
         }
 
-        function setRGB() {
-            const colorshower = document.querySelector("#hexVal");
-            let R = document.querySelector("#r").value;
-            let G = document.querySelector("#g").value;
-            let B = document.querySelector("#b").value;
-            color = `rgb(${R},${G},${B})`;
-            colorshower.textContent = color;
-            setBrush();
-        }
+        const brush = {
+            type: "normal",
+            value: 1,
+            color: "",
+            scale: 1,
+            isPainting: false,
 
-        function setBrush() {
+            setScale() {
+                const scaleshower = document.querySelector("#scl");
+                this.scale = scaleshower.value;
+                this.setBrush();
+            },
+
+            setRGB() {
+                const colorshower = document.querySelector("#hexVal");
+                let R = document.querySelector("#r").value;
+                let G = document.querySelector("#g").value;
+                let B = document.querySelector("#b").value;
+                this.color = `rgb(${R},${G},${B})`;
+                colorshower.textContent = this.color;
+                this.setBrush();
+            },
+
+            setBrush() {
+                console.log("called");
                 const canvas = document.querySelector("#brush-setting");
                 const cntx = canvas.getContext("2d");
                 cntx.clearRect(0, 0, canvas.width, canvas.height);
-                
 
-                brush.scale = scale;
-                brush.color = color;
-                
-                cntx.fillStyle = brush.color;
-                cntx.strokeStyle ="black";
-                cntx.fillRect(1,1,brush.scale,brush.scale);
-        }
-        function generateSpray() {
+                cntx.fillStyle = this.color;
+                cntx.fillRect(1, 1, this.scale, this.scale);
+            },
+
+            changeType(button) {
+                let val = button.value;
+                if (val == 3) {
+                    button.value = 1;
+                    button.innerHTML = "Normal Brush";
+                    brush.type = "normal";
+                } else if (val == 2) {
+                    button.value++;
+                    button.innerHTML = "Spray";
+                    brush.type = "spray";
+                } else if (val == 1) {
+                    button.value++;
+                    button.innerHTML = "Line";
+                    brush.type = "line";
+                }
+                setBrush();
+            },
 
         }
+
+
+        window.addEventListener("load", () => {
+            // const canvas = document.querySelector("#canvas");
+            currentCanvas = new cCanvas(document.querySelector("#canvas"));
+            console.log(currentCanvas);
+
+        })
 
         function changeType(button) {
             let val = button.value;
@@ -172,65 +181,75 @@
                 button.innerHTML = "Normal Brush";
                 brush.type = "normal";
             } else if (val == 2) {
-                button.value ++;
+                button.value++;
                 button.innerHTML = "Spray";
                 brush.type = "spray";
             } else if (val == 1) {
-                button.value ++;
+                button.value++;
                 button.innerHTML = "Line";
                 brush.type = "line";
             }
             setBrush();
         }
 
-        function resetCanvas() {
-            context.clearRect(0, 0, currentCanvas.width, currentCanvas.height);
-        }
+
 
         function saveCanvas() {
+            let canvas = {
+                index: canvasCount,
+                reference: document.querySelector("#canvas")
+            }
+            const gallery = document.querySelector("#canvas-holder");
+            const saved_canvas = document.createElement("canvas");
+            saved_canvas.id = "canvas" + canvas.index;
+            gallery.appendChild(saved_canvas);
+            createNewCanvas();
+        }
+
+        function createNewCanvas() {
+            canvasCount++;
 
         }
-        
-        </script>
+    </script>
+    <style>
+        #canvas {
+            border: black 1px solid;
+        }
 
-        <style>
-            
-            #canvas {
-                border: black 1px solid;
-            }
-            #toolBag {
-                float: right;
-                width: max-content;
-                background-color: cadetblue;
-            }
+        #toolBag {
+            float: right;
+            width: max-content;
+            background-color: cadetblue;
+        }
 
-            #buttons {
-                display: flex;
-            }
+        #buttons {
+            display: flex;
+        }
 
-            #buttons button {
-                width: 100%;
-                height: 100px;
-                background-color: bisque;
-                border: black solid 1px;
-            }
+        #buttons button {
+            width: 100%;
+            height: 100px;
+            background-color: bisque;
+            border: black solid 1px;
+        }
 
-            #sliders-color {
-                width: 50px;
-            }
+        #sliders-color {
+            width: 50px;
+        }
 
-            #sliders-color fieldset {
-                border: none;
-            }
-            
-            #sliders-scale {
-                width: 50px;
-            }
+        #sliders-color fieldset {
+            border: none;
+        }
 
-            #scale {
-                border: none;
-                width: 50px;
-            }
-        </style>
-    </body>
+        #sliders-scale {
+            width: 50px;
+        }
+
+        #scale {
+            border: none;
+            width: 50px;
+        }
+    </style>
+</body>
+
 </html>
