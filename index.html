@@ -41,7 +41,8 @@
         <div id="buttons">
             <button onclick="brush.changeType(this)" id="brush-type" value="1">Normal brush</button>
             <button onclick="currentCanvas.resetCanvas()" id="reset">Reset Canvas</button>
-            <button onclick="saveCanvas()" id="save">Save</button>
+            <button onclick="currentCanvas.saveCanvas()" id="save">Save</button>
+            <button onclick="currentCanvas.createCurve()" id="curve">Cureve</button>
         </div>
     </section>
 
@@ -51,8 +52,7 @@
          *      Canvas Saver
          */
 
-
-
+        let canvassaver = [];
         let currentCanvas;
         let canvasCount = 0;
         class cCanvas {
@@ -66,35 +66,122 @@
                 reference.height = "900";
                 reference.width = "900";
                 this.brush = brush;
-                this.
-
-
-                    reference.addEventListener("mousedown", () => {
-                        this.mouseDown();
-                    })
-
-                reference.addEventListener("mouseup", () => {
-                    this.mouseUp();
-                })
+                this.drawingMethod = (e) => { this.createCurve(e) };
 
                 const draw = (e) => {
-                    if (!brush.isPainting) {
-                        return;
-                    }
-
-                    this.ctx.strokeStyle = brush.color;
-                    this.ctx.lineWidth = brush.scale;
-                    this.ctx.lineCap = 'square';
-
-                    this.ctx.lineTo(e.clientX - this.canvasOffsetX, e.clientY);
-                    this.ctx.stroke();
+                    this.drawingMethod(e);
                 }
-                reference.addEventListener('mousemove', draw);
-
+                reference.addEventListener('move', draw);
             }
 
             get canvas() {
                 return this.reference;
+            }
+
+            drawNormal(e) {
+                this.reference.addEventListener("mousedown", () => {
+                    this.mouseDown();
+                })
+
+                this.reference.addEventListener("mouseup", () => {
+                    this.mouseUp();
+                })
+
+                if (!brush.isPainting) {
+                    return;
+                }
+
+                this.ctx.strokeStyle = brush.color;
+                this.ctx.lineWidth = brush.scale;
+                this.ctx.lineCap = 'square';
+
+                this.ctx.lineTo(e.clientX - this.canvasOffsetX, e.clientY);
+                this.ctx.stroke();
+            }
+            createCurve() {
+                let start = {}
+                let end = {};
+                let cp1 = {};
+                let cp2 = {};
+
+                this.reference.addEventListener("click", (e) => {
+                    start.x = e.clientX;
+                    start.y = e.clientY;
+                })
+
+
+                this.reference.addEventListener("click", (e) => {
+                    end.x = e.clientX;
+                    end.y = e.clientY;
+                })
+
+                this.reference.addEventListener("click", (e) => {
+                    cp1.x = e.clientX;
+                    cp1.y = e.clientY;
+                })
+
+                this.reference.addEventListener("click", (e) => {
+                    cp2.x = e.clientX;
+                    cp2.y = e.clientY;
+                })  
+                console.log("called");
+
+                this.ctx.beginPath();
+                this.ctx.arc(start.x, start.y, 5, 0, 2 * Math.PI);
+                this.ctx.arc(end.x, end.y, 5, 0, 2 * Math.PI);
+                this.ctx.fill();
+
+                this.ctx.fillStyle = 'red';
+                this.ctx.beginPath();
+                this.ctx.arc(cp1.x, cp1.y, 5, 0, 2 * Math.PI);  // Control point one
+                this.ctx.arc(cp2.x, cp2.y, 5, 0, 2 * Math.PI);  // Control point two
+                this.ctx.fill();
+            }
+
+            saveCanvas() {
+                let canvas = {
+                    index: canvasCount,
+                    reference: document.querySelector("#canvas")
+                }
+                const gallery = document.querySelector("#canvas-holder");
+                const canvabutton = document.createElement("button");
+                canvabutton.id = "canvabutton" + canvas.index;
+                canvabutton.style.width = "50";
+                canvabutton.style.height = "50";
+                canvabutton.innerHTML = "Load Canvas #" + canvasCount;
+                canvabutton.onclick = () => { this.exctractCanvas(canvas.index) };
+                gallery.appendChild(canvabutton);
+                let image = this.ctx.getImageData(0, 0, this.reference.width, this.reference.height);
+                canvassaver[canvas.index] = image;
+                this.createNewCanvas();
+            }
+
+            changeType(button) {
+                let val = button.value;
+                if (val == 3) {
+                    button.value = 1;
+                    button.innerHTML = "Normal Brush";
+
+                } else if (val == 2) {
+                    button.value++;
+                    button.innerHTML = "Spray";
+                    brush.type = "spray";
+                } else if (val == 1) {
+                    button.value++;
+                    button.innerHTML = "Line";
+                    brush.type = "line";
+                }
+                this.setBrush();
+            }
+
+            exctractCanvas(index) {
+                let save = canvassaver[index];
+                this.ctx.putImageData(save, 0, 0);
+            }
+
+            createNewCanvas() {
+                this.resetCanvas()
+                canvasCount++;
             }
 
 
@@ -108,15 +195,7 @@
                 this.ctx.beginPath();
             }
 
-            mouseDraw() {
-                if (!this.brush.isPainting) {
-                    return;
-                }
-                brush.brushMethod;
-            }
-
             resetCanvas() {
-                console.log("ran")
                 this.ctx.clearRect(0, 0, this.reference.width, this.reference.height);
             }
 
@@ -153,61 +232,13 @@
                 cntx.fillStyle = this.color;
                 cntx.fillRect(1, 1, this.scale, this.scale);
             },
-
-            changeType(button) {
-                let val = button.value;
-                if (val == 3) {
-                    button.value = 1;
-                    button.innerHTML = "Normal Brush";
-                    brush.type = "normal";
-                } else if (val == 2) {
-                    button.value++;
-                    button.innerHTML = "Spray";
-                    brush.type = "spray";
-                } else if (val == 1) {
-                    button.value++;
-                    button.innerHTML = "Line";
-                    brush.type = "line";
-                }
-                this.setBrush();
-            },
-
         }
-
 
         window.addEventListener("load", () => {
             currentCanvas = new cCanvas(document.querySelector("#canvas"));
             console.log(currentCanvas);
         })
 
-        function saveCanvas() {
-            // not implemented
-            let canvas = {
-                index: canvasCount,
-                reference: document.querySelector("#canvas")
-            }
-            const gallery = document.querySelector("#canvas-holder");
-            const canvabutton = document.createElement("button");
-            canvabutton.id = "canvabutton" + canvas.index;
-            canvabutton.style.width = "50";
-            canvabutton.style.height = "50";
-            canvabutton.innerHTML = "Load Canvas #" + canvasCount;
-            canvabutton.onclick = exctractCanvas;
-            gallery.appendChild(canvabutton);
-
-            const save = window.sessionStorage.setItem(canvas.index, JSON.stringify(currentCanvas));
-            console.log(JSON.stringify(currentCanvas));
-            createNewCanvas();
-        }
-
-        function exctractCanvas() {
-            console.log("called exctract");
-        }
-
-        function createNewCanvas() {
-            // not implemented
-            canvasCount++;
-        }
     </script>
     <style>
         #canvas {
