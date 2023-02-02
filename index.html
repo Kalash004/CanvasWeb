@@ -10,6 +10,7 @@
 
 <body>
     <canvas id="canvas"></canvas>
+    <section id="canvas-holder"></section>
     <section id="toolBag">
         <div id="sliders-color">
             <fieldset id="R">
@@ -43,10 +44,17 @@
             <button onclick="saveCanvas()" id="save">Save</button>
         </div>
     </section>
-    <section id="canvas-holder"></section>
+
     <script>
-        let currentCanvas; 
-        let canvasCount = 1;
+        /**
+         * TODO: Brushes
+         *      Canvas Saver
+         */
+
+
+
+        let currentCanvas;
+        let canvasCount = 0;
         class cCanvas {
             constructor(reference) {
                 this.reference = reference;
@@ -58,11 +66,12 @@
                 reference.height = "900";
                 reference.width = "900";
                 this.brush = brush;
+                this.
 
 
-                reference.addEventListener("mousedown", () => {
-                    this.mouseDown();
-                })
+                    reference.addEventListener("mousedown", () => {
+                        this.mouseDown();
+                    })
 
                 reference.addEventListener("mouseup", () => {
                     this.mouseUp();
@@ -114,7 +123,6 @@
         }
 
         const brush = {
-            type: "normal",
             value: 1,
             color: "",
             scale: 1,
@@ -161,58 +169,49 @@
                     button.innerHTML = "Line";
                     brush.type = "line";
                 }
-                setBrush();
+                this.setBrush();
             },
 
         }
 
 
         window.addEventListener("load", () => {
-            // const canvas = document.querySelector("#canvas");
             currentCanvas = new cCanvas(document.querySelector("#canvas"));
             console.log(currentCanvas);
-
         })
 
-        function changeType(button) {
-            let val = button.value;
-            if (val == 3) {
-                button.value = 1;
-                button.innerHTML = "Normal Brush";
-                brush.type = "normal";
-            } else if (val == 2) {
-                button.value++;
-                button.innerHTML = "Spray";
-                brush.type = "spray";
-            } else if (val == 1) {
-                button.value++;
-                button.innerHTML = "Line";
-                brush.type = "line";
-            }
-            setBrush();
-        }
-
-
-
         function saveCanvas() {
+            // not implemented
             let canvas = {
                 index: canvasCount,
                 reference: document.querySelector("#canvas")
             }
             const gallery = document.querySelector("#canvas-holder");
-            const saved_canvas = document.createElement("canvas");
-            saved_canvas.id = "canvas" + canvas.index;
-            gallery.appendChild(saved_canvas);
+            const canvabutton = document.createElement("button");
+            canvabutton.id = "canvabutton" + canvas.index;
+            canvabutton.style.width = "50";
+            canvabutton.style.height = "50";
+            canvabutton.innerHTML = "Load Canvas #" + canvasCount;
+            canvabutton.onclick = exctractCanvas;
+            gallery.appendChild(canvabutton);
+
+            const save = window.sessionStorage.setItem(canvas.index, JSON.stringify(currentCanvas));
+            console.log(JSON.stringify(currentCanvas));
             createNewCanvas();
         }
 
-        function createNewCanvas() {
-            canvasCount++;
+        function exctractCanvas() {
+            console.log("called exctract");
+        }
 
+        function createNewCanvas() {
+            // not implemented
+            canvasCount++;
         }
     </script>
     <style>
         #canvas {
+            float: left;
             border: black 1px solid;
         }
 
